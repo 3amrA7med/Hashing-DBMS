@@ -16,10 +16,14 @@
 #include <stdio.h>
 
 
-#define MBUCKETS  10					//Number of BUCKETS
-#define RECORDSPERBUCKET 2				//No. of records inside each Bucket
-#define BUCKETSIZE sizeof(Bucket)		//Size of the bucket (in bytes)
-#define FILESIZE BUCKETSIZE*MBUCKETS    //Size of the file 
+#define MBUCKETS  10					                        //Number of BUCKETS
+#define RECORDSPERBUCKET 2				                     //No. of records inside each Bucket
+#define BUCKETSIZE sizeof(Bucket)		                  //Size of the bucket (in bytes)
+#define FILESIZE BUCKETSIZE*MBUCKETS                     //Size of the file 
+
+#define RECORD_SIZE sizeof(DataItem)                     //Size of one record
+#define MOVERFLOW_RECORDS 10                             //Number of overflow records
+#define STARTING_ADDRESS_OF_OVERFLOW_RECORDS FILESIZE    //Starting address for the overflow records within file
 
 
 //Data Record inside the file
@@ -27,6 +31,7 @@ struct DataItem {
    int valid;    //) means invalid record, 1 = valid record
    int data;     
    int key;
+   int nextOffset;            // Needed for chaining algorithm
 };
 
 
