@@ -45,7 +45,8 @@ int main(){
 //here we create a sample test to read and write to our database file
 
   //1. Create Database file or Open it if it already exists, check readfile.cpp
-   filehandle = createFile(FILESIZE,"openaddressing");
+  // In case of applying chaining algorithm we will need overflow part
+   filehandle = createFile(FILESIZE + OVERFLOW_PART,"openaddressing");
   //2. Display the database file, check openAddressing.cpp
    DisplayFile(filehandle);
 
@@ -81,12 +82,10 @@ int main(){
 
    //7. Display the final data base
    DisplayFile(filehandle);
+   
    // And Finally don't forget to close the file.
    close(filehandle);
    return 0;
-
-
-
 }
 
 /* functionality: insert the (key,data) pair into the database table

@@ -24,6 +24,7 @@
 #define RECORD_SIZE sizeof(DataItem)                     //Size of one record
 #define MOVERFLOW_RECORDS 10                             //Number of overflow records
 #define STARTING_ADDRESS_OF_OVERFLOW_RECORDS FILESIZE    //Starting address for the overflow records within file
+#define OVERFLOW_PART MOVERFLOW_RECORDS*RECORD_SIZE
 
 
 //Data Record inside the file
