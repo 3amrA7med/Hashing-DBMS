@@ -52,7 +52,10 @@ int DisplayFile(int fd);
 int deleteOffset(int filehandle, int Offset);
 int searchItem(int filehandle,struct DataItem* item,int *count);
 
-
+//check chaining file
+int insertItemChainingAlgorithm(int fd,DataItem item);
+int searchItemChainingAlgorithm(int fd,struct DataItem* item,int *count);
+int DisplayOverflowPart(int fd);
 
 
 #endif /* READFILE_H_ */

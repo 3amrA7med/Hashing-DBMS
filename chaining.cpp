@@ -4,7 +4,7 @@
  * Input: key used to calculate the hash
  * Output: HashValue;
  */
-int hashCode(int key){
+int hashCodeChaining(int key){
    return key % MBUCKETS;
 }
 
@@ -26,16 +26,17 @@ int hashCode(int key){
 int insertItemChainingAlgorithm(int fd,DataItem item){
 
     item.nextOffset = -1;
+    int offsetOfLastRecordInChain;
     int count = 0;				                        //No of accessed records
-	int hashIndex = hashCode(item.key);  				//calculate the Bucket index
+	int hashIndex = hashCodeChaining(item.key);  				//calculate the Bucket index
 	int Offset = hashIndex*sizeof(Bucket);				//Offset variable which we will use to iterate on the db
     struct DataItem data1,data2;
     
 
     // Loop on all records within same bucket until you find a free space.
     for(int i = 0; i < RECORDSPERBUCKET; i++) {
-        
 	    ssize_t result = pread(fd,&data1,sizeof(DataItem), Offset);
+        offsetOfLastRecordInChain = Offset;
         //one record accessed
         count++;
         //check whether it is a valid record or not
@@ -46,7 +47,11 @@ int insertItemChainingAlgorithm(int fd,DataItem item){
         // No data
         else if (data1.valid == 0) {
             //No record available means empty space we can insert in it
-            ssize_t result = pwrite(fd, &item, sizeof(DataItem), Offset);
+            ssize_t wresult = pwrite(fd, &item, sizeof(DataItem), Offset);
+            if(wresult < 0) {
+                perror("Insertion Failed");
+                return count;
+            }
             return count;
         }   
         else { //look for the next free record
@@ -60,17 +65,20 @@ int insertItemChainingAlgorithm(int fd,DataItem item){
 
     while(offsetOfNextRecord != -1)
     {
+        offsetOfLastRecordInChain = offsetOfNextRecord;
         // Get the result of chaining
-        ssize_t result = pread(fd,&data1,sizeof(DataItem), Offset);
+        ssize_t result = pread(fd,&data1,sizeof(DataItem), offsetOfNextRecord);
         //one record accessed
         count++;
         offsetOfNextRecord = data1.nextOffset;
     }
 
+    //printf("HERE : %d,%d\n", offsetOfLastRecordInChain, data1.key);
+
 
     for(Offset = STARTING_ADDRESS_OF_OVERFLOW_RECORDS; Offset< (FILESIZE + OVERFLOW_PART); Offset+=sizeof(DataItem)) {
-        
 	    ssize_t result = pread(fd,&data2,sizeof(DataItem), Offset);
+       
         //one record accessed
         count++;
         //check whether it is a valid record or not
@@ -81,14 +89,22 @@ int insertItemChainingAlgorithm(int fd,DataItem item){
         // No data
         else if (data2.valid == 0) {
             //No record available means empty space we can insert in it
-            ssize_t result = pwrite(fd, &item, sizeof(DataItem), Offset);
+            ssize_t wresult = pwrite(fd, &item, sizeof(DataItem), Offset);
+            if(wresult < 0) {
+                perror("Insertion Failed");
+                return count;
+            }
             // put address to the next record in the chain
+            
             data1.nextOffset = Offset;
+            wresult = pwrite(fd, &data1, sizeof(DataItem), offsetOfLastRecordInChain);
+            if(wresult < 0) {
+                perror("Insertion Failed");
+                return count;
+            }
             return count;
         }   
     }
-
-    perror("No empty place");
     return count;
 }
 
@@ -108,11 +124,10 @@ int insertItemChainingAlgorithm(int fd,DataItem item){
 
 int searchItemChainingAlgorithm(int fd,struct DataItem* item,int *count)
 {
-
 	//Definitions
 	struct DataItem data;                               //a variable to read in it the records from the db
 	*count = 0;				                            //No of accessed records
-	int hashIndex = hashCode(item->key);  				//calculate the Bucket index
+	int hashIndex = hashCodeChaining(item->key);  		//calculate the Bucket index
 	int Offset = hashIndex*sizeof(Bucket);				//Offset variable which we will use to iterate on the db
 
     // Loop on all records within same bucket.
@@ -123,7 +138,8 @@ int searchItemChainingAlgorithm(int fd,struct DataItem* item,int *count)
         (*count)++;
         //check whether it is a valid record or not
         if(result <= 0) //either an error happened in the pread or it hit an unallocated space
-        { 	 // perror("some error occurred in pread");
+        { 	 
+            perror("some error occurred in pread");
             return -1;
         }
         else if (data.valid == 1 && data.key == item->key) {
@@ -144,7 +160,7 @@ int searchItemChainingAlgorithm(int fd,struct DataItem* item,int *count)
     while(offsetOfNextRecord != -1)
     {
         // Get the result of chaining
-        ssize_t result = pread(fd,&data,sizeof(DataItem), Offset);
+        ssize_t result = pread(fd,&data,sizeof(DataItem), offsetOfNextRecord);
         //one record accessed
         (*count)++;
         //check whether it is a valid record or not
@@ -154,8 +170,8 @@ int searchItemChainingAlgorithm(int fd,struct DataItem* item,int *count)
         }
         else if (data.valid == 1 && data.key == item->key) {
             //I found the needed record
-            item->data = data.data ;
-            return Offset;
+            //item->data = data.data;
+            return offsetOfNextRecord;
         }  
         offsetOfNextRecord = data.nextOffset;
     }
@@ -177,11 +193,12 @@ int DisplayOverflowPart(int fd){
 		{ 	  perror("some error occurred in pread");
 			  return -1;
 		} else if (result == 0 || data.valid == 0 ) { //empty space found or end of file
-			printf("Bucket: %d, Offset %d:~\n",Offset/BUCKETSIZE,Offset);
+			printf("Overflow Record: %d, Offset %d:~\n",(Offset-STARTING_ADDRESS_OF_OVERFLOW_RECORDS)/sizeof(DataItem), Offset);
 		} else {
 			pread(fd,&data,sizeof(DataItem), Offset);
-			printf("Bucket: %d, Offset: %d, Data: %d, key: %d\n",Offset/BUCKETSIZE,Offset,data.data,data.key);
-					 count++;
+			printf("Overflow Record: %d, Offset: %d, Data: %d, key: %d , Next Offset: %d\n", 
+                (Offset-STARTING_ADDRESS_OF_OVERFLOW_RECORDS)/sizeof(DataItem),Offset,data.data,data.key, data.nextOffset);
+			count++;
 		}
 	}
 	return count;

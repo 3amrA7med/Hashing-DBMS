@@ -74,15 +74,23 @@ int main(){
    //4. Display the database file again
    DisplayFile(filehandle);
 
+   //In case of using chaining algorithm display overflow part
+   DisplayOverflowPart(filehandle);
+
    //5. Search the database
    search(13);
 
    //6. delete an item from the database
    deleteItem(31);
 
+   
+
    //7. Display the final data base
    DisplayFile(filehandle);
-   
+
+   //In case of using chaining algorithm display overflow part
+   DisplayOverflowPart(filehandle);
+
    // And Finally don't forget to close the file.
    close(filehandle);
    return 0;
@@ -98,7 +106,8 @@ void insert(int key,int data){
      item.data = data;
      item.key = key;
      item.valid = 1;
-     int result= insertItem(filehandle,item);  //TODO: implement this function in openAddressing.cpp
+     //int result= insertItem(filehandle,item);  //TODO: implement this function in openAddressing.cpp
+     int result= insertItemChainingAlgorithm(filehandle,item);
      printf("Insert: No. of searched records:%d\n",abs(result));
 }
 
@@ -109,16 +118,17 @@ void insert(int key,int data){
 */
 struct DataItem * search(int key)
 {
-  struct DataItem* item = (struct DataItem *) malloc(sizeof(struct DataItem));
-     item->key = key;
-     int diff = 0;
-     int Offset= searchItem(filehandle,item,&diff); //this function is implemented for you in openAddressing.cpp
-     printf("Search: No of records searched is %d\n",diff);
-     if(Offset <0)  //If offset is negative then the key doesn't exists in the table
-       printf("Item not found\n");
-     else
-        printf("Item found at Offset: %d,  Data: %d and key: %d\n",Offset,item->data,item->key);
-  return item;
+   struct DataItem* item = (struct DataItem *) malloc(sizeof(struct DataItem));
+      item->key = key;
+      int diff = 0;
+      // int Offset= searchItem(filehandle,item,&diff); //this function is implemented for you in openAddressing.cpp
+      int Offset= searchItemChainingAlgorithm(filehandle,item,&diff);
+      printf("Search: No of records searched is %d\n",diff);
+      if(Offset <0)  //If offset is negative then the key doesn't exists in the table
+            printf("Item not found\n");
+      else
+            printf("Item found at Offset: %d,  Data: %d and key: %d\n",Offset,item->data,item->key);
+   return item;
 }
 
 /* Functionality: delete a record with a certain key
@@ -130,8 +140,10 @@ int deleteItem(int key){
    struct DataItem* item = (struct DataItem *) malloc(sizeof(struct DataItem));
    item->key = key;
    int diff = 0;
-   int Offset= searchItem(filehandle,item,&diff);
+   //int Offset= searchItem(filehandle,item,&diff);
+   int Offset= searchItemChainingAlgorithm(filehandle,item,&diff);
    printf("Delete: No of records searched is %d\n",diff);
+   printf("Delete: Offset %d\n",Offset);
    if(Offset >=0 )
    {
     return deleteOffset(filehandle,Offset);
