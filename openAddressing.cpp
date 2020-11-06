@@ -4,7 +4,7 @@
  * Input: key used to calculate the hash
  * Output: HashValue;
  */
-int hashCode(int key){
+int hashCode1(int key){
    return key % MBUCKETS;
 }
 
@@ -32,8 +32,48 @@ int hashCode(int key){
        the  file  descriptor  fd  at  offset  offset.
  */
 int insertItem(int fd,DataItem item){
-   //TODO: implement this function
-   return 0;
+	int count = 0;
+	struct DataItem data;
+	int rewind = 0;
+	int hashIndex = hashCode1(item.key);  	
+	int startingOffset = hashIndex*sizeof(Bucket);
+	int Offset = startingOffset;	
+
+	RESEEK:
+	//on the linux terminal use man pread to check the function manual
+	ssize_t result = pread(fd,&data,sizeof(DataItem), Offset);
+	//one record accessed
+	count++;
+	//check whether it is a valid record or not
+    if(result <= 0) //either an error happened in the pread or it hit an unallocated space
+	{ 	// perror("some error occurred in pread");
+		return -1;
+    }
+
+	//empty bucket 
+    if (data.valid == 0) {
+		int inResult = pwrite(fd,&item,sizeof(DataItem), Offset);
+		//insertion failed
+		if(inResult <=0)
+			return -1;
+		//insertion succeeded
+		return count;
+    }
+	//bucket is occupied
+	else {
+    	Offset +=sizeof(DataItem);  //move the offset to next record
+		//if reached end of the file start again
+    	if(Offset >= FILESIZE && rewind ==0 ){ 
+    			rewind = 1;
+    			Offset = 0;
+    			goto RESEEK;
+    	}
+		//if looped over the whole file and did not find empty bucket
+		else if(rewind == 1 && Offset >= startingOffset)
+    		return -1; //no empty spaces
+		
+		goto RESEEK;
+    }
 }
 
 
@@ -57,7 +97,7 @@ int searchItem(int fd,struct DataItem* item,int *count)
 	struct DataItem data;   //a variable to read in it the records from the db
 	*count = 0;				//No of accessed records
 	int rewind = 0;			//A flag to start searching from the first bucket
-	int hashIndex = hashCode(item->key);  				//calculate the Bucket index
+	int hashIndex = hashCode1(item->key);  				//calculate the Bucket index
 	int startingOffset = hashIndex*sizeof(Bucket);		//calculate the starting address of the bucket
 	int Offset = startingOffset;						//Offset variable which we will use to iterate on the db
 
