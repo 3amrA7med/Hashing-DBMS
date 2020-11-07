@@ -1,19 +1,29 @@
 #include "readfile.h"
 
+#define PRIME 7     //I CHOSED SEVEN CAUSE IT NEEDS TO BE LESS THAN THE TABEL LIST (WHICH IS 10) AND PRIME
+
 int hash1(int key){
     return key % MBUCKETS;
 }
 
 //this hash funtion squares the key and take the middle digit
 // note that here we took one digit cause the array we have is just 10 elements
+// int hash2(int key) {
+//     int square = key*key;
+//     if(square>10) {
+//         square = square/10;
+//         return square % 10;
+//     } else {
+//         return square;      //in this case square = square % 10
+//     }
+// }
+
+int primeHash(int key) {
+    return PRIME - (key % PRIME);
+}
+
 int hash2(int key) {
-    int square = key*key;
-    if(square>10) {
-        square = square/10;
-        return square % 10;
-    } else {
-        return square;      //in this case square = square % 10
-    }
+    return (hash1(key) + primeHash(key)) % MBUCKETS;
 }
 
 int insertItemMH(int fd,DataItem item) 
@@ -51,7 +61,7 @@ int insertItemMH(int fd,DataItem item)
     }
 
     //second hash function
-    hashIndex = hash2(hashIndex);
+    hashIndex = hash2(item.key);
     Offset = hashIndex*sizeof(Bucket);
     result = pread(fd,&data,sizeof(DataItem), Offset);
     count++;
@@ -129,7 +139,7 @@ int searchItemMH(int fd,struct DataItem* item,int *count)
     }
 
     //second hash function
-    hashIndex = hash2(hashIndex);
+    hashIndex = hash2(item->key);
     Offset = hashIndex*sizeof(Bucket);
     result = pread(fd,&data,sizeof(DataItem), Offset);
     (*count)++;
