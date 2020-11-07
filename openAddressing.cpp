@@ -31,7 +31,7 @@ int hashCode1(int key){
  * 	pwrite() writes up to count bytes from the buffer starting  at  buf  to
        the  file  descriptor  fd  at  offset  offset.
  */
-int insertItem(int fd,DataItem item){
+int insertItemOA(int fd,DataItem item){
 	int count = 0;
 	struct DataItem data;
 	int rewind = 0;
@@ -90,7 +90,7 @@ int insertItem(int fd,DataItem item){
  * Output: the in the file where we found the item
  */
 
-int searchItem(int fd,struct DataItem* item,int *count)
+int searchItemOA(int fd,struct DataItem* item,int *count)
 {
 
 	//Definitions
@@ -139,7 +139,7 @@ int searchItem(int fd,struct DataItem* item,int *count)
  *
  * Output: no. of non-empty records
  */
-int DisplayFile(int fd){
+int DisplayFileOA(int fd){
 
 	struct DataItem data;
 	int count = 0;
@@ -169,7 +169,7 @@ int DisplayFile(int fd){
  *
  * Hint: you could only set the valid key and write just and integer instead of the whole record
  */
-int deleteOffset(int fd, int Offset)
+int deleteOffsetOA(int fd, int Offset)
 {
 	struct DataItem dummyItem;
 	dummyItem.valid = 0;

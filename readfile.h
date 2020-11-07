@@ -47,15 +47,21 @@ int createFile(int size, char *);
 
 //check the openAddressing File
 int deleteItem(int key);
-int insertItem(int fd,DataItem item);
+int insertItemOA(int fd,DataItem item);
 int DisplayFile(int fd);
 int deleteOffset(int filehandle, int Offset);
-int searchItem(int filehandle,struct DataItem* item,int *count);
+int searchItemOA(int filehandle,struct DataItem* item,int *count);
 
 //check chaining file
 int insertItemChainingAlgorithm(int fd,DataItem item);
 int searchItemChainingAlgorithm(int fd,struct DataItem* item,int *count);
 int DisplayOverflowPart(int fd);
+
+//check multipleHAshing file
+int searchItemMH(int filehandle,struct DataItem* item,int *count);
+int insertItemMH(int fd,DataItem item);
+
+
 
 
 #endif /* READFILE_H_ */

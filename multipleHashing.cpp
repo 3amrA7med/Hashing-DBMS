@@ -16,7 +16,7 @@ int hash2(int key) {
     }
 }
 
-int insertItem(int fd,DataItem item) 
+int insertItemMH(int fd,DataItem item) 
 {
 
     struct DataItem data;
@@ -94,7 +94,7 @@ int insertItem(int fd,DataItem item)
 
 
 
-int searchItem(int fd,struct DataItem* item,int *count)
+int searchItemMH(int fd,struct DataItem* item,int *count)
 {
 	struct DataItem data;
     //first hash function
