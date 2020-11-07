@@ -64,7 +64,7 @@ int main(){
    "1: Chaining"<<endl<<"2: Multiple Hashing"<< endl;
    cin >> Alg; 
 
-   cout << "Enter test case number from 1 to 6" << endl;
+   cout << "Enter test case number from "<<Alg*2+1 <<" to "<< Alg*2 + 2 << endl;
    cin >> testcase;
    //=================================================================================
 
@@ -175,7 +175,7 @@ void test1(){
    insert(2, 70);
    insert(42, 80);
    insert(4, 25);
-   insert(12, 44);
+   insert(15, 44);
    insert(14, 32);
    insert(17, 11);
    insert(13, 78);
@@ -193,43 +193,59 @@ void test1(){
    //4. Display the database file again
    DisplayFile(filehandle);
 
-   //In case of using chaining algorithm display overflow part
-   //DisplayOverflowPart(filehandle);
-
    //5. Search the database
    search(13);
+   search(9);
+   search(31);
+   search(15);
+
    //6. delete an item from the database
    deleteItem(31);
+   deleteItem(1);
+   deleteItem(4);
+
+   insert(41, 92);
+   insert(44, 920);
+
 }
 void test2(){
    //3. Add some data in the table
    insert(1, 20);
-   insert(2, 70);
-   insert(42, 80);
-   insert(4, 25);
-   insert(12, 44);
-   insert(14, 32);
-   insert(17, 11);
-   insert(13, 78);
-   insert(37, 97);
-   insert(11, 34);
-   insert(22, 730);
-   insert(46, 840);
-   insert(9, 83);
-   insert(21, 424);
-   insert(41, 115);
+   insert(11, 70);
+   insert(41, 80);
+   insert(21, 25);
+   insert(31, 44);
+   insert(12, 32);
+   insert(22, 11);
+   insert(32, 78);
+   insert(33, 97);
+   insert(13, 34);
+   insert(23, 730);
+   insert(43, 840);
+   insert(95, 83);
+   insert(25, 424);
+   insert(47, 115);
    insert(71, 47);
-   insert(31, 92);
+   insert(61, 92);
    insert(73, 45);
 
    //4. Display the database file again
    DisplayFile(filehandle);
 
    //5. Search the database
-   search(13);
+   search(11);
+   search(33);
+   search(71);
 
    //6. delete an item from the database
    deleteItem(31);
+   deleteItem(61);
+   deleteItem(25);
+
+   insert(3, 45);
+   insert(2, 405);
+   insert(5, 450);
+
 }
 void test3(){
    //3. Add some data in the table
@@ -303,7 +319,7 @@ void test5(){
    insert(2, 70);
    insert(42, 80);
    insert(4, 25);
-   insert(12, 44);
+   insert(15, 44);
    insert(14, 32);
    insert(17, 11);
    insert(13, 78);
@@ -323,37 +339,54 @@ void test5(){
 
    //5. Search the database
    search(13);
+   search(9);
+   search(31);
+   search(15);
 
    //6. delete an item from the database
    deleteItem(31);
+   deleteItem(1);
+   deleteItem(4);
+
+   insert(41, 92);
+   insert(44, 920);
 }
 void test6(){
    //3. Add some data in the table
    insert(1, 20);
-   insert(2, 70);
-   insert(42, 80);
-   insert(4, 25);
-   insert(12, 44);
-   insert(14, 32);
-   insert(17, 11);
-   insert(13, 78);
-   insert(37, 97);
-   insert(11, 34);
-   insert(22, 730);
-   insert(46, 840);
-   insert(9, 83);
-   insert(21, 424);
-   insert(41, 115);
+   insert(11, 70);
+   insert(41, 80);
+   insert(21, 25);
+   insert(31, 44);
+   insert(12, 32);
+   insert(22, 11);
+   insert(32, 78);
+   insert(33, 97);
+   insert(13, 34);
+   insert(23, 730);
+   insert(43, 840);
+   insert(95, 83);
+   insert(25, 424);
+   insert(47, 115);
    insert(71, 47);
-   insert(31, 92);
+   insert(61, 92);
    insert(73, 45);
 
    //4. Display the database file again
    DisplayFile(filehandle);
 
    //5. Search the database
-   search(13);
+   search(11);
+   search(33);
+   search(71);
 
    //6. delete an item from the database
    deleteItem(31);
+   deleteItem(61);
+   deleteItem(25);
+
+   insert(3, 45);
+   insert(2, 405);
+   insert(5, 450);
+
 }
