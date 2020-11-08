@@ -92,6 +92,7 @@ int main(){
 
    // And Finally don't forget to close the file.
    close(filehandle);
+   int x = remove("openaddressing");
    return 0;
 }
 
