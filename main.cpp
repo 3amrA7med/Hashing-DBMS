@@ -50,13 +50,7 @@ int filehandle;   //handler for the database file
 
 int main(){
 
-//here we create a sample test to read and write to our database file
-
-  //1. Create Database file or Open it if it already exists, check readfile.cpp
-  // In case of applying chaining algorithm we will need overflow part
-   //filehandle = createFile(FILESIZE + OVERFLOW_PART,"openaddressing");
-   filehandle = createFile(FILESIZE,"openaddressing");
-   
+   //here we create a sample test to read and write to our database file
    //=========================CHOOSE ALGORITHM AND TESTCASE==========================
    int testcase;
 
@@ -64,12 +58,27 @@ int main(){
    "1: Chaining"<<endl<<"2: Multiple Hashing"<< endl;
    cin >> Alg; 
 
+   //1. Create Database file or Open it if it already exists, check readfile.cpp
+   if(Alg == 1) {
+      // In case of applying chaining algorithm we will need overflow part
+      cout <<"CHAINING" <<endl;
+      filehandle = createFile(FILESIZE + OVERFLOW_PART,"outputFile");
+   }
+   else {
+      filehandle = createFile(FILESIZE,"outputFile");
+   }
+
    cout << "Enter test case number from "<<Alg*2+1 <<" to "<< Alg*2 + 2 << endl;
    cin >> testcase;
    //=================================================================================
 
    //2. Display the database file, check openAddressing.cpp
-   DisplayFile(filehandle);
+   if(Alg == 1) { 
+      displayChainingAlgorithm(filehandle);
+   }
+   else {
+      DisplayFile(filehandle);
+   }
 
    if (testcase == 1)
       test1();
@@ -85,14 +94,18 @@ int main(){
       test6();   
 
    //7. Display the final data base
-   DisplayFile(filehandle);
-
+   if(Alg == 1) { 
+      displayChainingAlgorithm(filehandle);
+   }
+   else {
+      DisplayFile(filehandle);
+   }
    //In case of using chaining algorithm display overflow part
    //DisplayOverflowPart(filehandle);
 
    // And Finally don't forget to close the file.
    close(filehandle);
-   int x = remove("openaddressing");
+   int x = remove("outputFile");
    return 0;
 }
 
@@ -155,11 +168,13 @@ int deleteItem(int key){
    int Offset;
    if(Alg == 0)
       Offset= searchItemOA(filehandle,item,&diff);
-   else if (Alg == 1)
-      Offset= searchItemChainingAlgorithm(filehandle,item,&diff);
+   else if (Alg == 1) {
+      int result = deleteItemChainingAlgorithm(filehandle,item,&diff);
+      printf("Delete: No of records searched is %d\n",diff);
+      return result;
+   }
    else
       Offset= searchItemMH(filehandle,item,&diff);
-
 
    printf("Delete: No of records searched is %d\n",diff);
    printf("Delete: Offset %d\n",Offset);
@@ -270,16 +285,21 @@ void test3(){
    insert(73, 45);
 
    //4. Display the database file again
-   DisplayFile(filehandle);
-
-   //In case of using chaining algorithm display overflow part
-   DisplayOverflowPart(filehandle);
+   displayChainingAlgorithm(filehandle);
 
    //5. Search the database
    search(13);
 
    //6. delete an item from the database
-   deleteItem(31);
+   //deleteItem(31);
+   // deleteItem(71);
+   // search(31);
+   // insert(51, 555);
+   // search(51);
+   deleteItem(42);
+   search(22);
+   insert(32,3333);
+
 }
 void test4(){
    //3. Add some data in the table
@@ -303,10 +323,7 @@ void test4(){
    insert(73, 45);
 
    //4. Display the database file again
-   DisplayFile(filehandle);
-
-   //In case of using chaining algorithm display overflow part
-   DisplayOverflowPart(filehandle);
+   displayChainingAlgorithm(filehandle);
 
    //5. Search the database
    search(13);

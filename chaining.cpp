@@ -46,6 +46,9 @@ int insertItemChainingAlgorithm(int fd,DataItem item){
         }
         // No data
         else if (data1.valid == 0) {
+            if((data1.nextOffset > 0) && (i == RECORDSPERBUCKET-1)) {
+                item.nextOffset = data1.nextOffset;
+            }
             //No record available means empty space we can insert in it
             ssize_t wresult = pwrite(fd, &item, sizeof(DataItem), Offset);
             if(wresult < 0) {
@@ -170,7 +173,7 @@ int searchItemChainingAlgorithm(int fd,struct DataItem* item,int *count)
         }
         else if (data.valid == 1 && data.key == item->key) {
             //I found the needed record
-            //item->data = data.data;
+            item->data = data.data;
             return offsetOfNextRecord;
         }  
         offsetOfNextRecord = data.nextOffset;
@@ -201,5 +204,106 @@ int DisplayOverflowPart(int fd){
 			count++;
 		}
 	}
+	return count;
+}
+
+int deleteItemChainingAlgorithm(int fd, struct DataItem* item, int *count){
+
+    //Case 1: Item that will be deleted in the bucket
+    	//Definitions
+	struct DataItem data, prevData;                     //Variables to read in it the records from the db
+    int prevOffset, nextOffset;                                     //Store previous offset.
+	*count = 0;				                            //No of accessed records
+	int hashIndex = hashCodeChaining(item->key);  		//calculate the Bucket index
+	int Offset = hashIndex*sizeof(Bucket);				//Offset variable which we will use to iterate on the db
+
+    // Loop on all records within same bucket.
+    for(int i = 0; i < RECORDSPERBUCKET; i++) {
+        //on the linux terminal use man pread to check the function manual
+	    ssize_t result = pread(fd,&data,sizeof(DataItem), Offset);
+        //one record accessed
+        (*count)++;
+        //check whether it is a valid record or not
+        if(result <= 0) //either an error happened in the pread or it hit an unallocated space
+        { 	 
+            perror("some error occurred in pread");
+            return -1;
+        }
+        else if (data.valid == 1 && data.key == item->key) {
+            //I found the needed record
+            printf("Delete: Offset %d\n",Offset);
+            return deleteItemChaining(fd, Offset, data.nextOffset);
+        }   
+        else { //not the record I am looking for
+            Offset +=sizeof(DataItem);  //move the offset to next record
+        }
+    }
+
+    // Case 2: deleting item in overflow part
+    prevData = data;
+    prevOffset = Offset - sizeof(DataItem);
+    nextOffset = data.nextOffset;
+    while(nextOffset != -1) {
+        Offset = nextOffset;
+        // Get the result of chaining
+        ssize_t result = pread(fd,&data,sizeof(DataItem), Offset);
+        nextOffset = data.nextOffset;
+        //one record accessed
+        (*count)++;
+        //check whether it is a valid record or not
+        if(result <= 0) //either an error happened in the pread or it hit an unallocated space
+        { 	 // perror("some error occurred in pread");
+            return -1;
+        }
+        else if (data.valid == 1 && data.key == item->key) {
+            //I found the needed record
+            prevData.nextOffset = nextOffset;
+            ssize_t wresult = pwrite(fd, &prevData, sizeof(DataItem), prevOffset);
+            if(wresult < 0) {
+                perror("Deletion Failed");
+                return -1;                      //Failed
+            }
+            printf("Delete: Offset %d\n",Offset);
+            return deleteItemChaining(fd, Offset, 0);
+        }  
+        prevData = data;
+        prevOffset = Offset;
+    }
+
+    // No item found
+    printf("No Item found to delete");
+    return -1;
+}
+
+int deleteItemChaining(int fd, int Offset, int nextOffset)
+{
+	struct DataItem dummyItem;
+	dummyItem.valid = 0;
+	dummyItem.key = -1;
+	dummyItem.data = 0;
+    dummyItem.nextOffset = nextOffset;
+	int result = pwrite(fd,&dummyItem,sizeof(DataItem), Offset);
+	return result;
+}
+
+int displayChainingAlgorithm(int fd) {
+    struct DataItem data;
+	int count = 0;
+	int Offset = 0;
+	for(Offset =0; Offset< FILESIZE;Offset += sizeof(DataItem))
+	{
+		ssize_t result = pread(fd,&data,sizeof(DataItem), Offset);
+		if(result < 0)
+		{ 	  perror("some error occurred in pread");
+			  return -1;
+		} else if (result == 0 || data.valid == 0 ) { //empty space found or end of file
+			printf("Bucket: %d, Offset %d:~, Next Offset: %d\n",Offset/BUCKETSIZE, Offset, data.nextOffset);
+		} else {
+			pread(fd,&data,sizeof(DataItem), Offset);
+			printf("Bucket: %d, Offset: %d, Data: %d, key: %d, Next Offset: %d\n",Offset/BUCKETSIZE,Offset,data.data,data.key, data.nextOffset);
+					 count++;
+		}
+	}
+    count += DisplayOverflowPart(fd);
 	return count;
 }

@@ -154,7 +154,7 @@ int DisplayFileOA(int fd){
 			printf("Bucket: %d, Offset %d:~\n",Offset/BUCKETSIZE,Offset);
 		} else {
 			pread(fd,&data,sizeof(DataItem), Offset);
-			printf("Bucket: %d, Offset: %d, Data: %d, key: %d, Next Offset: %d\n",Offset/BUCKETSIZE,Offset,data.data,data.key, data.nextOffset);
+			printf("Bucket: %d, Offset: %d, Data: %d, key: %d",Offset/BUCKETSIZE,Offset,data.data,data.key);
 					 count++;
 		}
 	}

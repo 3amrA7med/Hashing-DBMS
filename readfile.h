@@ -55,7 +55,9 @@ int searchItemOA(int filehandle,struct DataItem* item,int *count);
 //check chaining file
 int insertItemChainingAlgorithm(int fd,DataItem item);
 int searchItemChainingAlgorithm(int fd,struct DataItem* item,int *count);
-int DisplayOverflowPart(int fd);
+int deleteItemChainingAlgorithm(int , struct DataItem* , int *);
+int displayChainingAlgorithm(int fd);
+int deleteItemChaining(int fd, int Offset, int nextOffset);
 
 //check multipleHAshing file
 int searchItemMH(int filehandle,struct DataItem* item,int *count);
