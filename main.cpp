@@ -302,7 +302,7 @@ void test3(){
 
 }
 void test4(){
-   //3. Add some data in the table
+   // Add some data in the table
    insert(1, 20);
    insert(2, 70);
    insert(42, 80);
@@ -311,25 +311,18 @@ void test4(){
    insert(14, 32);
    insert(17, 11);
    insert(13, 78);
-   insert(37, 97);
-   insert(11, 34);
-   insert(22, 730);
-   insert(46, 840);
-   insert(9, 83);
-   insert(21, 424);
-   insert(41, 115);
-   insert(71, 47);
-   insert(31, 92);
-   insert(73, 45);
 
-   //4. Display the database file again
+
+   // Display the database file again
    displayChainingAlgorithm(filehandle);
 
-   //5. Search the database
-   search(13);
+   // Test duplicate keys case
+   insert(14, 333);
+   insert(17, 444);
+   insert(13, 555);
 
-   //6. delete an item from the database
-   deleteItem(31);
+   // Display the database file again
+   displayChainingAlgorithm(filehandle);
 }
 void test5(){
    //3. Add some data in the table

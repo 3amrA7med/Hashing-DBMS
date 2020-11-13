@@ -53,7 +53,14 @@ int insertItemChainingAlgorithm(int fd,DataItem item){
             ssize_t wresult = pwrite(fd, &item, sizeof(DataItem), Offset);
             if(wresult < 0) {
                 perror("Insertion Failed");
-                return count;
+                
+            }
+            return count;
+        }
+        else if (data1.valid == 1 && data1.key == item.key) { // Override data with same key
+            ssize_t wresult = pwrite(fd, &item, sizeof(DataItem), Offset);
+            if(wresult < 0) {
+                perror("Insertion Failed");
             }
             return count;
         }   
@@ -73,10 +80,15 @@ int insertItemChainingAlgorithm(int fd,DataItem item){
         ssize_t result = pread(fd,&data1,sizeof(DataItem), offsetOfNextRecord);
         //one record accessed
         count++;
+        if (data1.valid == 1 && data1.key == item.key) { // Override data with same key
+            ssize_t wresult = pwrite(fd, &item, sizeof(DataItem), Offset);
+            if(wresult < 0) {
+                perror("Insertion Failed");
+            }
+            return count;
+        } 
         offsetOfNextRecord = data1.nextOffset;
     }
-
-    //printf("HERE : %d,%d\n", offsetOfLastRecordInChain, data1.key);
 
 
     for(Offset = STARTING_ADDRESS_OF_OVERFLOW_RECORDS; Offset< (FILESIZE + OVERFLOW_PART); Offset+=sizeof(DataItem)) {
