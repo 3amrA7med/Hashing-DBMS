@@ -304,25 +304,27 @@ void test3(){
 void test4(){
    // Add some data in the table
    insert(1, 20);
-   insert(2, 70);
-   insert(42, 80);
-   insert(4, 25);
-   insert(12, 44);
-   insert(14, 32);
-   insert(17, 11);
-   insert(13, 78);
-
-
+   insert(11, 70);
+   insert(21, 80);
+   insert(51, 4545);
+   
    // Display the database file again
    displayChainingAlgorithm(filehandle);
 
-   // Test duplicate keys case
-   insert(14, 333);
-   insert(17, 444);
-   insert(13, 555);
+   deleteItem(11);
+      // Display the database file again
+   displayChainingAlgorithm(filehandle);
+   insert(11, 70);
+
+   deleteItem(1);
 
    // Display the database file again
    displayChainingAlgorithm(filehandle);
+   // // Test duplicate keys case
+   insert(11, 333);
+
+   // // Display the database file again
+   // displayChainingAlgorithm(filehandle);
 }
 void test5(){
    //3. Add some data in the table

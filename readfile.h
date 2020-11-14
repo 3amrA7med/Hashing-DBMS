@@ -57,7 +57,7 @@ int insertItemChainingAlgorithm(int fd,DataItem item);
 int searchItemChainingAlgorithm(int fd,struct DataItem* item,int *count);
 int deleteItemChainingAlgorithm(int , struct DataItem* , int *);
 int displayChainingAlgorithm(int fd);
-int deleteItemChaining(int fd, int Offset, int nextOffset);
+int deleteItemChaining(int fd, int Offset);
 
 //check multipleHAshing file
 int searchItemMH(int filehandle,struct DataItem* item,int *count);

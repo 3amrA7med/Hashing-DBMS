@@ -25,7 +25,7 @@ int hashCodeChaining(int key){
  */
 int insertItemChainingAlgorithm(int fd,DataItem item){
 
-    item.nextOffset = -1;
+    item.nextOffset = 0;
     int offsetOfLastRecordInChain;
     int count = 0;				                        //No of accessed records
 	int hashIndex = hashCodeChaining(item.key);  				//calculate the Bucket index
@@ -46,14 +46,13 @@ int insertItemChainingAlgorithm(int fd,DataItem item){
         }
         // No data
         else if (data1.valid == 0) {
-            if((data1.nextOffset > 0) && (i == RECORDSPERBUCKET-1)) {
-                item.nextOffset = data1.nextOffset;
-            }
+            // if((data1.nextOffset > 0) && (i == RECORDSPERBUCKET-1)) {
+            //     item.nextOffset = data1.nextOffset;
+            // }
             //No record available means empty space we can insert in it
             ssize_t wresult = pwrite(fd, &item, sizeof(DataItem), Offset);
             if(wresult < 0) {
                 perror("Insertion Failed");
-                
             }
             return count;
         }
@@ -72,16 +71,15 @@ int insertItemChainingAlgorithm(int fd,DataItem item){
     // If we reached here it means that we have gone through all records in the bucket 
     // so we are going to see if there is any chaining occured
     int offsetOfNextRecord = data1.nextOffset;
-
-    while(offsetOfNextRecord != -1)
+    while(offsetOfNextRecord > 0)
     {
         offsetOfLastRecordInChain = offsetOfNextRecord;
         // Get the result of chaining
         ssize_t result = pread(fd,&data1,sizeof(DataItem), offsetOfNextRecord);
         //one record accessed
         count++;
-        if (data1.valid == 1 && data1.key == item.key) { // Override data with same key
-            ssize_t wresult = pwrite(fd, &item, sizeof(DataItem), Offset);
+        if (data1.valid == 1 && data1.key == item.key) { // Overwrite data with same key
+            ssize_t wresult = pwrite(fd, &item, sizeof(DataItem), offsetOfLastRecordInChain);
             if(wresult < 0) {
                 perror("Insertion Failed");
             }
@@ -172,7 +170,7 @@ int searchItemChainingAlgorithm(int fd,struct DataItem* item,int *count)
     int offsetOfNextRecord = data.nextOffset;
 
     // If there is no chaining return -1.
-    while(offsetOfNextRecord != -1)
+    while(offsetOfNextRecord > 0)
     {
         // Get the result of chaining
         ssize_t result = pread(fd,&data,sizeof(DataItem), offsetOfNextRecord);
@@ -223,16 +221,19 @@ int deleteItemChainingAlgorithm(int fd, struct DataItem* item, int *count){
 
     //Case 1: Item that will be deleted in the bucket
     	//Definitions
-	struct DataItem data, prevData;                     //Variables to read in it the records from the db
+	struct DataItem data, prevData, tempData, tempDataChained;                     //Variables to read in it the records from the db
     int prevOffset, nextOffset;                                     //Store previous offset.
 	*count = 0;				                            //No of accessed records
 	int hashIndex = hashCodeChaining(item->key);  		//calculate the Bucket index
 	int Offset = hashIndex*sizeof(Bucket);				//Offset variable which we will use to iterate on the db
+    bool deleteFromBucket = false;                      //flag to know if the item is deleted inside the bucket.
+    int resultFromDeleteOperation;                       //variable to hold the returned result from delete function
+    ssize_t result, wresult;
 
     // Loop on all records within same bucket.
     for(int i = 0; i < RECORDSPERBUCKET; i++) {
         //on the linux terminal use man pread to check the function manual
-	    ssize_t result = pread(fd,&data,sizeof(DataItem), Offset);
+	    result = pread(fd,&data,sizeof(DataItem), Offset);
         //one record accessed
         (*count)++;
         //check whether it is a valid record or not
@@ -244,18 +245,69 @@ int deleteItemChainingAlgorithm(int fd, struct DataItem* item, int *count){
         else if (data.valid == 1 && data.key == item->key) {
             //I found the needed record
             printf("Delete: Offset %d\n",Offset);
-            return deleteItemChaining(fd, Offset, data.nextOffset);
+            //resultFromDeleteOperation = deleteItemChaining(fd, Offset, data.nextOffset);
+            deleteFromBucket = true;
+            break;
         }   
         else { //not the record I am looking for
             Offset +=sizeof(DataItem);  //move the offset to next record
         }
+    }
+    
+    if(deleteFromBucket) {
+        int offsetOfLastRecordInBucket = hashIndex*sizeof(Bucket) + sizeof(DataItem) * (RECORDSPERBUCKET-1);
+        int offsetThatWillBeDeleted;
+        result = pread(fd,&tempData,sizeof(DataItem), offsetOfLastRecordInBucket); // Last element in the bucket
+        //one record accessed
+        (*count)++;
+        if(result <= 0) 
+        { 	 
+            perror("some error occurred in pread");
+            return -1;
+        }
+        if (tempData.nextOffset > 0) { // if there is an item in the overflow part 
+            result = pread(fd,&tempDataChained,sizeof(DataItem), tempData.nextOffset); // Last element in the bucket
+            offsetThatWillBeDeleted = tempData.nextOffset;
+            (*count)++;
+            if(result <= 0) //either an error happened in the pread or it hit an unallocated space
+            { 	 
+                perror("some error occurred in pread");
+                return -1;
+            }
+            int tempNextOffset = tempDataChained.nextOffset;
+            tempDataChained.nextOffset = 0;
+            wresult = pwrite(fd, &tempDataChained, sizeof(DataItem), Offset); // Overwrite this item in the offset of the deleted record in the bucket
+            if(wresult < 0) {
+                perror("Deletion Failed");
+                return -1;                      //Failed
+            }
+            result = pread(fd,&tempData,sizeof(DataItem), offsetOfLastRecordInBucket); // in case the element deleted was the last element.
+            //one record accessed
+            (*count)++;
+            if(result <= 0) //either an error happened in the pread or it hit an unallocated space
+            { 	 
+                perror("some error occurred in pread");
+                return -1;
+            }
+            tempData.nextOffset = tempNextOffset;
+            wresult = pwrite(fd, &tempData, sizeof(DataItem), offsetOfLastRecordInBucket); // Overwrite this item in the offset of the deleted record in the bucket
+            if(wresult < 0) {
+                perror("Deletion Failed");
+                return -1;                      //Failed
+            }
+            return deleteItemChaining(fd, offsetThatWillBeDeleted);
+        }
+        else {
+            return deleteItemChaining(fd, Offset);
+        }
+        return -1;
     }
 
     // Case 2: deleting item in overflow part
     prevData = data;
     prevOffset = Offset - sizeof(DataItem);
     nextOffset = data.nextOffset;
-    while(nextOffset != -1) {
+    while(nextOffset > 0) {
         Offset = nextOffset;
         // Get the result of chaining
         ssize_t result = pread(fd,&data,sizeof(DataItem), Offset);
@@ -276,7 +328,7 @@ int deleteItemChainingAlgorithm(int fd, struct DataItem* item, int *count){
                 return -1;                      //Failed
             }
             printf("Delete: Offset %d\n",Offset);
-            return deleteItemChaining(fd, Offset, 0);
+            return deleteItemChaining(fd, Offset);
         }  
         prevData = data;
         prevOffset = Offset;
@@ -287,13 +339,13 @@ int deleteItemChainingAlgorithm(int fd, struct DataItem* item, int *count){
     return -1;
 }
 
-int deleteItemChaining(int fd, int Offset, int nextOffset)
+int deleteItemChaining(int fd, int Offset)
 {
 	struct DataItem dummyItem;
 	dummyItem.valid = 0;
 	dummyItem.key = -1;
 	dummyItem.data = 0;
-    dummyItem.nextOffset = nextOffset;
+    dummyItem.nextOffset = 0;
 	int result = pwrite(fd,&dummyItem,sizeof(DataItem), Offset);
 	return result;
 }
