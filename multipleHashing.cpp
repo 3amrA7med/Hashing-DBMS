@@ -41,7 +41,7 @@ int insertItemMH(int fd,DataItem item)
     {
         return -1;  //error
     }
-    else if (data.valid == 0)
+    else if (data.valid == 0 || data.key == item.key)
     {   //found
         pwrite(fd,&item,sizeof(DataItem),Offset);
         return count; //stored
@@ -55,7 +55,7 @@ int insertItemMH(int fd,DataItem item)
     if(result <= 0) {
         return -1;  //error
     }
-    else if (data.valid == 0) {
+    else if (data.valid == 0 || data.key == item.key) {
         pwrite(fd,&item,sizeof(DataItem),Offset);
         return count; //stored
     }
@@ -70,7 +70,7 @@ int insertItemMH(int fd,DataItem item)
     {
         return -1;  //error
     } 
-    else if (data.valid == 0) //found
+    else if (data.valid == 0 || data.key == item.key) //found
     {   
         pwrite(fd,&item,sizeof(DataItem),Offset);
         return count;//stored
@@ -87,7 +87,7 @@ int insertItemMH(int fd,DataItem item)
         {
             return -1;
         } 
-        else if (data.valid == 0)
+        else if (data.valid == 0 || data.key == item.key)
         {
             pwrite(fd,&item,sizeof(DataItem),Offset);
             return count; //stored
