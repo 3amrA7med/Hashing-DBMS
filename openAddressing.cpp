@@ -37,8 +37,27 @@ int insertItemOA(int fd,DataItem item){
 	int rewind = 0;
 	int hashIndex = hashCode1(item.key);  	
 	int startingOffset = hashIndex*sizeof(Bucket);
-	int Offset = startingOffset;	
+	int Offset = startingOffset;
 
+	int searchOffset;	
+	int c = 0;
+	struct DataItem* searchItem = (struct DataItem *) malloc(sizeof(struct DataItem));
+	searchItem->key = item.key;
+
+	//===============Check for items with the same key==============
+	searchOffset = searchItemOA(fd,searchItem, &c);
+	//item already found with same key
+	if(searchOffset >=0 ){
+		
+		//overwrite data
+		int inResult = pwrite(fd,&item,sizeof(DataItem), searchOffset);
+		//insertion failed
+		if(inResult <=0)
+			return -1;
+		//insertion succeeded
+		return c;
+	}
+	//==============================================================
 	RESEEK:
 	//on the linux terminal use man pread to check the function manual
 	ssize_t result = pread(fd,&data,sizeof(DataItem), Offset);

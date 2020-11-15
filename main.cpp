@@ -188,6 +188,7 @@ int deleteItem(int key){
 void test1(){
    //3. Add some data in the table
    insert(1, 20);
+   insert(1, 30);
    insert(2, 70);
    insert(42, 80);
    insert(4, 25);
@@ -211,7 +212,8 @@ void test1(){
 
    //5. Search the database
    search(13);
-   search(9);
+   search(1);
+   search(42);
    search(31);
    search(15);
 
@@ -250,17 +252,21 @@ void test2(){
 
    //5. Search the database
    search(11);
-   search(33);
+   search(41);
    search(71);
+   search(33);
+   search(13);
 
    //6. delete an item from the database
    deleteItem(31);
    deleteItem(61);
    deleteItem(25);
 
+   insert(91, 445);
    insert(3, 45);
    insert(2, 405);
    insert(5, 450);
+   insert(5, 660);
 
 }
 void test3(){
@@ -289,6 +295,11 @@ void test3(){
 
    //5. Search the database
    search(13);
+   search(31);
+   search(22);
+   search(46);
+   search(73);
+   search(22);
 
    //6. delete an item from the database
    //deleteItem(31);
@@ -307,9 +318,24 @@ void test4(){
    insert(11, 70);
    insert(21, 80);
    insert(51, 4545);
+   insert(22, 880);
+   insert(32, 8);
+   insert(42, 890);
+   insert(52, 810);
+   insert(61, 180);
+   insert(25, 580);
+   insert(35, 380);
+   insert(41, 780);
+   insert(62, 890);
    
    // Display the database file again
    displayChainingAlgorithm(filehandle);
+
+   search(51);
+   search(61);
+   search(41);
+   search(32);
+   search(62);
 
    deleteItem(11);
       // Display the database file again
@@ -352,7 +378,8 @@ void test5(){
 
    //5. Search the database
    search(13);
-   search(9);
+   search(1);
+   search(42);
    search(31);
    search(15);
 
@@ -390,16 +417,21 @@ void test6(){
 
    //5. Search the database
    search(11);
-   search(33);
+   search(41);
    search(71);
+   search(33);
+   search(13);
 
    //6. delete an item from the database
    deleteItem(31);
    deleteItem(61);
    deleteItem(25);
 
+   insert(91, 445);
    insert(3, 45);
    insert(2, 405);
    insert(5, 450);
+   insert(5, 660);
+
 
 }
