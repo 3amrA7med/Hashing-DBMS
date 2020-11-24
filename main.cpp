@@ -302,11 +302,11 @@ void test3(){
    search(22);
 
    //6. delete an item from the database
-   //deleteItem(31);
-   // deleteItem(71);
-   // search(31);
-   // insert(51, 555);
-   // search(51);
+   deleteItem(31);
+   deleteItem(71);
+   search(31);
+   insert(51, 555);
+   search(51);
    deleteItem(42);
    search(22);
    insert(32,3333);
@@ -343,6 +343,8 @@ void test4(){
    insert(11, 70);
 
    deleteItem(1);
+   deleteItem(41);
+   deleteItem(61);
 
    // Display the database file again
    displayChainingAlgorithm(filehandle);
